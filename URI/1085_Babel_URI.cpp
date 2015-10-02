@@ -1,14 +1,13 @@
-#include <stdio.h>
+#include <iostream>
 #include <queue>
+#include <unordered_map>
 #include <climits>
 #include <vector>
 #include <string>
-#include <iostream>
-// #include <unordered_map>
 
 using namespace std;
 
-typedef struct 
+typedef struct
 {
 	int v;
 	int c;
@@ -21,93 +20,148 @@ typedef struct
 	int pai;
 }Path;
 
-vector< vector<Edge> > graph;
-
-vector<int> custos;
-vector<int> pais;
-vector<string> vertices;
-vector<bool> visinhos;
-
+bool operator <(const Path& lhs, const Path& rhs){return lhs.c > rhs.c;}
 
 int main()
 {
+
+
 	int ne;
-	scanf("%d", &ne);
-
-	
-
-	while(ne!=0)
+	while(cin >> ne, ne!=0)
 	{
-		for(int i = 0; i<ne; i++)
+		
+		vector<vector<Edge>> graph;
+		unordered_map<string, int> languages;
+		int nLang = 0;
+		
+		auto createLang = [&](const string& ling)
+	    {
+	        for(int i = 0; i<26; i++)
+	        {
+	        	graph.push_back(vector<Edge>());
+	        }
+	        languages[ling] = nLang;
+	        nLang += 1;
+	    };
+
+	    auto createEdge = [&](const string& v1, const string& v2, const string& word)
+	    {
+	    	int off = word[0] - 'a';
+	    	int index1 = languages[v1] * 26;
+	    	int index2 = languages[v2] * 26;
+	    	int custo = word.length();
+
+	    	for(int i = 0; i<26; i++)
+	    	{
+	    		if(i == off) continue;
+	    		Edge e1;
+	    		Edge e2;
+
+	    		e1.c = custo;
+	    		e2.c = custo;
+	    		e1.v = index1 + off;
+	    		e2.v = index2 + off;
+	    		graph[index2 + i].push_back(e1);
+	    		graph[index1 + i].push_back(e2);
+	     	}
+	    };
+
+		string langI;
+		string langF;
+		cin >> langI >> langF;
+
+		createLang(langI);
+		createLang(langF);
+
+		for(int a = 0; a<ne; a++)
 		{
-			string langI;
-			string langF;
-			// scanf("%s %s", &langI, &langF);
-			cin >> langI >> langF;
-			Edge e1;
-			Edge e2;
-			string s1;
-			string s2;
-			string sc;
-			// scanf("%s %s %s", &s1, &s2, &sc);
+			string s1, s2, sc;
 			cin >> s1 >> s2 >> sc;
 
-			int custo = sc.length();
-			int indice1;
-			int indice2;
-
-			bool ntem1 = true;
-			bool ntem2 = true;
-			unsigned int j;
-			for (j = 0; j<vertices.size() && (ntem1 || ntem2); j++)
 			{
-				if(vertices[j]==s1)
+				auto search = languages.find(s1);
+				if(search==languages.end())
 				{
-					ntem1 = false;
-					indice1 = j;
-				}
-				else if(vertices[j]==s2)
-				{
-					
-					ntem2 = false;
-					indice2 = j;
+					createLang(s1);
 				}
 			}
 
-			e1.v = indice1;
-			e1.c = custo;
-			e2.v = indice2;
-			e2.c = custo;
-
-			if(ntem1)
 			{
-				vertices.push_back(s1);
-				e1.v++;
+				auto search = languages.find(s2);
+				if(search==languages.end())
+				{
+					createLang(s2);
+				}
 			}
 
-			if (ntem2)
-			{
-				vertices.push_back(s2);
-				if(ntem1)
-					e2.v = e1.v+1;
-				else
-					e2.v++;
-			}
-			
-			graph[e2.v].push_back(e1);
-			graph[e1.v].push_back(e2);
+			createEdge(s1, s2, sc);
 		}
 
-		for (unsigned int i = 0; i < graph.size(); ++i)
+		graph.push_back( vector<Edge>() );
+		graph.push_back( vector<Edge>() );
+		int fonte = 26*nLang;
+		int ralo = 26*nLang+1;
+
+		for (int i = 0; i < 26; ++i)
 		{
-			printf("%s\n", vertices[i].c_str());
-			for (unsigned int j = 0; j < graph[i].size(); ++j)
-			{
-				printf(" %d %d\n", graph[i][j].v, graph[i][j].c);
-			}
+			Edge e;
+			e.c = 0;
+			e.v = 0 + i;
+			graph[fonte].push_back(e);
 		}
 
-		scanf("%d", &ne);
+		for (int i = 0; i < 26; ++i)
+		{
+			Edge e;
+			e.c = 0;
+			e.v = ralo;
+			graph[26+i].push_back(e);
+		}
+
+		vector<bool> visitados;
+		vector<int> custos;
+		vector<int> pais;
+		priority_queue<Path> heap;
+		for(int i = 0; i<=ralo; i++)
+		{
+			visitados.push_back(false);
+			custos.push_back(INT_MAX);
+			pais.push_back(-2);
+		}
+
+		Path root;
+		root.c = 0;
+		root.pai = -1;
+		root.v = fonte;
+		heap.push(root);
+
+		while(!heap.empty())
+		{
+			Path p = heap.top();
+			heap.pop();
+			if(visitados[p.v])continue;
+			
+			custos[p.v] = p.c;
+			pais[p.v] = p.pai;
+			visitados[p.v] = true;
+
+			for(const auto& e : graph[p.v])
+			{
+				Path visinho;
+				visinho.v = e.v;
+				visinho.c = p.c + e.c;
+				visinho.pai = p.v;
+				heap.push(visinho);
+			}
+		}
+		if(!visitados[ralo])
+		{
+			cout<<"impossivel"<<"\n";
+		}
+		else
+		{
+			cout<<custos[ralo]<<"\n";
+		}
 	}
 	return 0;
 }
