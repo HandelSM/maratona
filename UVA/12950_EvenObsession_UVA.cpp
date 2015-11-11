@@ -44,16 +44,13 @@ void createEdge( int v1, int v2, int c, vector<Edge>* graph)
 	graph[e2i.v].push_back(e1p);
 }
 
-int custos[N];
-bool visitados[N];
-int pais[N];
-priority_queue<Path> heap;
+
 
 int main()
 {
 	int n, e;
-	scanf("%d %d", &n, &e);
-	
+	while(scanf("%d %d", &n, &e)!=EOF)
+	{
 		vector<Edge> graph[N];
 		for (int i = 0; i < e; ++i)
 		{
@@ -62,6 +59,10 @@ int main()
 			createEdge(v1, v2, c, graph);
 		}
 
+		static int custos[N];
+		static bool visitados[N];
+		static int pais[N];
+
 		for (int i = 1; i <= n*2; ++i)
 		{
 			visitados[i] = false;
@@ -69,6 +70,7 @@ int main()
 			custos[i] = INT_MAX;
 		}
 
+		static priority_queue<Path> heap;
 		Path p;
 		p.c = 0;
 		p.v = 2;
@@ -100,6 +102,6 @@ int main()
 			printf("%d\n", custos[2*n]);
 		else
 			printf("-1\n");
-	
+	}
 	return 0;
 }

@@ -6,7 +6,7 @@ int main()
 {
 	int j, r;
 	
-	while(scanf("%d %d", &j, &r)!= EOF)
+	scanf("%d %d", &j, &r);
 	{
 		for (int i = 1; i < j+1; ++i)
 		{

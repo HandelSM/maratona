@@ -7,7 +7,7 @@ int main()
 {
 	int n;
 	
-	while(scanf("%d", &n) != EOF)
+	scanf("%d", &n);
 	{
 		int counter = 0;
 		for(int i = 0; i<8 && n>0; i++)
