@@ -21,7 +21,7 @@ void dfs( int v, int p )
 	d[v] = tempo;
 	low[v] = tempo;
 	tempo++;
-	bool any = false;
+	//bool any = false;
 	int size = graph[v].size();
 	for(int i = 0; i<size; i++)
 	{
@@ -29,7 +29,7 @@ void dfs( int v, int p )
 		{
 			dfs(graph[v][i], v);
 			nf++;
-			if(low[v] >= d[graph[v][i]]) any = true;
+			//if(low[v] >= d[graph[v][i]]) any = true;
 			low[graph[v][i]] = min(low[graph[v][i]], low[v]);
 			if(low[v] > low[graph[v][i]])
 			{
@@ -59,9 +59,24 @@ int main()
 
 	dfs(0, -1);	
 
-	for(int i = 0; i<pontes.size(); i++)
+	for(int i = 0; i<n; i++)
+	{
+		cout<<i<<endl;
+		for(unsigned int j = 0; j<graph[i].size(); j++)
+		{
+			cout << " " << graph[i][j]<<endl;
+
+		}
+	}
+
+	for(unsigned int i = 0; i<pontes.size(); i++)
 	{
 		printf("%d %d\n", pontes[i].first, pontes[i].second);
+	}
+
+	for(int i = 0; i<20; i++)
+	{
+		cout<< visitados[i] <<" " << d[i] << " " << low[i] <<endl;
 	}
 }
 
