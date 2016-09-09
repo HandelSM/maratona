@@ -5,12 +5,15 @@
 #include <utility>
 #include <string.h>
 
+#define TRACE(x...) 
+
 using namespace std;
 
-vector<int> graph[100]; 
+vector<vector<int> > graph(100);
 int tempo = 0;
 bool visitados[100];
 vector< pair<int, int> > pontes;
+vector<int> arcPoints;
 int d[100];
 int low[100];
 
@@ -21,24 +24,35 @@ void dfs( int v, int p )
 	d[v] = tempo;
 	low[v] = tempo;
 	tempo++;
-	//bool any = false;
+	bool any = false;
 	int size = graph[v].size();
 	for(int i = 0; i<size; i++)
 	{
-		if(!visitados[graph[v][i]])
+		int u = graph[v][i];
+		if(u == p) continue;
+		if(!visitados[u])
 		{
-			dfs(graph[v][i], v);
+			dfs(u, v);
 			nf++;
-			//if(low[v] >= d[graph[v][i]]) any = true;
-			low[graph[v][i]] = min(low[graph[v][i]], low[v]);
-			if(low[v] > low[graph[v][i]])
+			if(d[v] <= low[u])
+				any = true;	
+			low[v] = min(low[u], low[v]);
+			if(low[v] < low[u])
 			{
 				pontes.push_back(make_pair(v, graph[v][i]));
 			}
 		}
 		else
 		{
-			low[v] = min(low[graph[v][i]], low[v]);
+			low[v] = min(low[v], d[u]);
+		}
+		if(v==p && nf>1)
+		{
+			arcPoints.push_back(v);
+		}
+		else if(p!=-1 && any)
+		{	
+			arcPoints.push_back(v); 
 		}
 	}
 }
@@ -57,26 +71,31 @@ int main()
 		graph[b].push_back(a);
 	}
 
-	dfs(0, -1);	
-
-	for(int i = 0; i<n; i++)
-	{
-		cout<<i<<endl;
-		for(unsigned int j = 0; j<graph[i].size(); j++)
-		{
-			cout << " " << graph[i][j]<<endl;
-
-		}
-	}
-
+	dfs(1, -1);	
+	
+	cout<< "Bridges:"<<endl;
 	for(unsigned int i = 0; i<pontes.size(); i++)
 	{
-		printf("%d %d\n", pontes[i].first, pontes[i].second);
+		printf("%d-%d\n", pontes[i].first, pontes[i].second);
 	}
 
-	for(int i = 0; i<20; i++)
+	cout<<endl;
+	
+	cout<<"Articulation points: "<<endl;
+	for(unsigned int i = 0; i<arcPoints.size(); i++)
 	{
-		cout<< visitados[i] <<" " << d[i] << " " << low[i] <<endl;
-	}
+		cout<<arcPoints[i]<<endl;
+	}	
+
+
+TRACE
+(
+	for(int i = 1; i<=n; i++)
+	{
+		cout<<"Vertice: " << i<<endl;
+		cout<< "d: " << d[i] << " " << "low: " << low[i] << endl;
+		cout<<endl;
+	}	
+)
 }
 
